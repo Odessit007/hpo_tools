@@ -40,6 +40,7 @@ repos:
         stages: [commit]
         language: system
         entry: poetry run pytest
+        always_run: false
         types: [python]
 
       - id: pytest-cov

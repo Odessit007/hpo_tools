@@ -3,7 +3,7 @@ from hpo_tools.ontology import Ontology
 
 class TestBuild:
     def test_from_obo_file(self):
-        path = '../data/hp.obo'
+        path = 'data/hp.obo'
         ontology = Ontology.from_obo_file(path)
         assert ontology.version == '2023-04-05', 'Version mismatch.'
         term = 'HP:0041117'

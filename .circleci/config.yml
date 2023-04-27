@@ -14,6 +14,9 @@ jobs:
           command: |
             curl -sSL https://install.python-poetry.org | python3 -
       - run:
+          name: Check poetry
+          command: poetry --version
+      - run:
           name: Install dependencies
           command: poetry install
       - run:

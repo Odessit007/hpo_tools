@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.10.2
+      - image: cimg/python:3.9.6
     steps:
       - checkout
       - run:
@@ -18,7 +18,7 @@ jobs:
           command: poetry install
       - run:
           name: Run tests
-          command: pytest
+          command: poetry run pytest
 workflows:
   build-and-test:
     jobs:

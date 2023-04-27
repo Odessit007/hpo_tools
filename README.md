@@ -1,5 +1,10 @@
 A set of open-source tools to simplify phenotypic research.
 
+
+This package uses the Human Phenotype Ontology. Find out more at http://www.human-phenotype-ontology.org.
+See also the publication: Sebastian Köhler et al., The Human Phenotype Ontology in 2021, Nucleic Acids Research, Volume 49, Issue D1, 8 January 2021, Pages D1207–D1217, https://doi.org/10.1093/nar/gkaa1043
+
+
 The epic plan:
 * basic ontology interaction utils
   * [Phase 1] download and read .obo file (via Pronto)

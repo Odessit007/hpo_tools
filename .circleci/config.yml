@@ -13,7 +13,7 @@ jobs:
           name: Uninstall old Poetry and install the latest version of Poetry
           command: |
             poetry --version
-            curl -sSL https://install.python-poetry.org | python3 -
+            poetry self update -vvv
             poetry --version
       - run:
           name: Install dependencies

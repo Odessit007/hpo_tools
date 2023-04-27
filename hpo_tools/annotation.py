@@ -51,7 +51,6 @@ class Annotation:
             "hpo_tools",
             f'missing_terms_report{"_" + self.name if self.name else ""}_{timestamp}.log',
         )
-        print(42)
         report = {key: self._get_missing_terms(hpo_ids) for key, hpo_ids in self.entity2hpo.items()}
         report = {key: hpo_ids for key, hpo_ids in report.items() if hpo_ids}
         if not report:

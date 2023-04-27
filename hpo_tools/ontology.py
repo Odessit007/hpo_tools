@@ -3,8 +3,6 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 import pandas as pd  # TODO Temporary
 import pronto
 
-print(42)
-
 
 def _traverse_pronto(hpo: pronto.Ontology, term: pronto.term.Term, is_a: Dict[str, List[str]]):
     is_a[term.id] = [t.id for t in term.superclasses(1, False) if t.id != "HP:0000001"]
@@ -62,6 +60,7 @@ class Ontology:
         self.categories: List[Set[int]] = self._build_categories()
         self.ancestors: List[Set[int]] = [self.get_node_ancestors(node) for node in self.nodes]
 
+    # TODO Remove?
     def get_node(self, node, mode="name"):
         if mode == "raw":
             return node
@@ -71,6 +70,7 @@ class Ontology:
             return self.inverse_pheno_indexer[node]
         raise RuntimeError(f"Bad mode {mode}. Must be one of 'raw', 'name' or 'id'")
 
+    # TODO Remove?
     def get_node_neighborhood(self, node, mode="name"):
         return {
             self.get_node(node, mode): {

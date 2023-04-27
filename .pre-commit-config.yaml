@@ -7,6 +7,7 @@ repos:
         language: system
         entry: poetry run isort
         types: [python]
+        exclude: tmp.py
 
       - id: black
         name: black
@@ -21,7 +22,7 @@ repos:
         language: system
         entry: poetry run flake8
         types: [python]
-        exclude: setup.py
+        exclude: tmp.py
 
       - id: mypy
         name: mypy
@@ -30,6 +31,7 @@ repos:
         entry: poetry run mypy
         types: [python]
         pass_filenames: false
+        exclude: tmp.py
 
       - id: pytest
         name: pytest
@@ -38,6 +40,7 @@ repos:
         entry: poetry run pytest
         always_run: false
         types: [python]
+        exclude: tmp.py
 
       - id: pytest-cov
         name: pytest
@@ -46,3 +49,4 @@ repos:
         entry: poetry run pytest --cov --cov-fail-under=100
         types: [python]
         pass_filenames: false
+        exclude: tmp.py

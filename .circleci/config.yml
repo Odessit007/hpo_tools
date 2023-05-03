@@ -18,8 +18,14 @@ jobs:
           name: Install dependencies
           command: pdm install
       - run:
-          name: Run tests
+          name: Test
           command: pdm run pytest
+      - run:
+          name: Lint
+          command: pdm run flake8
+      - run:
+          name: Check types
+          command: pdm run mypy
 workflows:
   build-and-test:
     jobs:

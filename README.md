@@ -1,8 +1,5 @@
 ![](https://github.com/hpo-tools/hpo_tools/actions/workflows/test_and_lint.yml/badge.svg)
 
-<p>
-    <img src="https://github.com/hpo-tools/hpo_tools/actions/workflows/test_and_lint.yml/badge.svg" alt="" height="130">
-</p>
 
 A set of open-source tools to simplify phenotypic research.
 

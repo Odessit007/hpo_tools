@@ -1,6 +1,5 @@
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
-import pandas as pd  # TODO Temporary
 import pronto
 
 
@@ -34,12 +33,12 @@ class Ontology:
         names = [hpo[hpo_id].name for hpo_id in hpo_ids]
         return cls(hpo_ids, names, is_a, version)  # type: ignore
 
-    @classmethod
-    def from_phenodf(cls, phenodf: pd.DataFrame):
-        hpo_ids: List[str] = list(phenodf.index)
-        names: List[str] = phenodf["name"].tolist()
-        is_a = {index: row["is_a"] for index, row in phenodf.iterrows()}
-        return cls(hpo_ids, names, is_a)
+    # @classmethod
+    # def from_phenodf(cls, phenodf: pd.DataFrame):
+    #     hpo_ids: List[str] = list(phenodf.index)
+    #     names: List[str] = phenodf["name"].tolist()
+    #     is_a = {index: row["is_a"] for index, row in phenodf.iterrows()}
+    #     return cls(hpo_ids, names, is_a)
 
     def __init__(self, hpo_ids: List[str], names: List[str], is_a: Dict[str, List[str]], version: Optional[str] = None):
         self.hpo_ids = hpo_ids
@@ -59,25 +58,6 @@ class Ontology:
         self.category_nodes = sorted(children[self.root])
         self.categories: List[Set[int]] = self._build_categories()
         self.ancestors: List[Set[int]] = [self.get_node_ancestors(node) for node in self.nodes]
-
-    # TODO Remove?
-    def get_node(self, node, mode="name"):
-        if mode == "raw":
-            return node
-        elif mode == "name":
-            return self.names[node]
-        elif mode == "id":
-            return self.inverse_pheno_indexer[node]
-        raise RuntimeError(f"Bad mode {mode}. Must be one of 'raw', 'name' or 'id'")
-
-    # TODO Remove?
-    def get_node_neighborhood(self, node, mode="name"):
-        return {
-            self.get_node(node, mode): {
-                "children": {self.get_node(child, mode) for child in self.children[node]},
-                "parents": {self.get_node(parent, mode) for parent in self.parents[node]},
-            }
-        }
 
     def _build_graph(
         self, is_a: Dict[str, List[str]], sanity_check: bool = True

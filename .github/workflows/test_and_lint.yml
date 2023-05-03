@@ -1,9 +1,9 @@
 name: Test and Lint
 
-#on: workflow_dispatch
-on:
-  push:
-    branches: [ "main" ]
+on: workflow_dispatch
+#on:
+#  push:
+#    branches: [ "main" ]
 #  pull_request:
 #    branches: [ "main" ]
 
@@ -29,7 +29,6 @@ jobs:
         architecture: x64
         version: 2.5.3
         enable-pep582: false
-      run: pdm -V
     - name: Install dependencies
       run: pdm install
     - name: Lint with flake8

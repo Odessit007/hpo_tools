@@ -23,10 +23,10 @@ jobs:
 #            poetry install
       - run:
           name: Install dependencies
-          command: poetry install
+          command: pdm install
       - run:
           name: Run tests
-          command: poetry run pytest
+          command: pdm run pytest
 workflows:
   build-and-test:
     jobs:

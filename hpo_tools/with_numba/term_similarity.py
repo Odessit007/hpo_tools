@@ -5,9 +5,9 @@ import numpy as np
 from numpy import single, uint
 from numpy.typing import NDArray
 
-from hpo_tools.annotation import Annotation
-from hpo_tools.ontology import Ontology
-from hpo_tools.with_numba.set_utils import intersection_max, intersection_sum, union_sum
+from annotation import Annotation
+from ontology import Ontology
+from with_numba.set_utils import intersection_max, intersection_sum, union_sum
 
 
 @nb.njit

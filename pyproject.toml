@@ -1,42 +1,38 @@
-[tool.poetry]
-name = "hpo-tools"
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=23.3.0",
+    "isort>=5.12.0",
+    "flake8>=5.0.4",
+    "mypy>=1.2.0",
+    "pytest>=7.3.1",
+    "pytest-cov>=4.0.0",
+    "pre-commit>=3.3.1",
+    "jupyter>=1.0.0",
+]
+
+[project]
+name = "hpo_tools"
 version = "0.1.0"
 description = "A set of tools to simplify interaction with HPO ontology."
-authors = ["Odessit007 <igor.vustyanyuk@gmail.com>"]
-license = "GPL-3.0-only"
-readme = "README.md"
-repository = "https://github.com/Odessit007/hpo_tools"
-keywords = [
-    "Phenotypes",
-    "Ontology",
-    "HPO"
+authors = [
+    {name = "Odessit007", email = "igor.vustyanyuk@gmail.com"},
 ]
-packages = [{include = "hpo_tools"}]
+dependencies = [
+    "pronto>=2.5.4",
+    "numba>=0.57.0",
+    "numpy>=1.24.3",
+]
+requires-python = ">=3.8,<3.12"
+readme = "README.md"
+license = {text = "GPL-3.0-only"}
 
-[tool.poetry.dependencies]
-python = ">=3.8.1,<3.12"
-pronto = "^2.5.4"
-numba = "0.57.0"
-numpy = "^1.24"
-pandas = "^2.0.1"
-obonet = "^1.0.0"
-scipy = "^1.10.1"
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
 
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
-isort = "^5.12.0"
-flake8 = "^6.0.0"
-mypy = "^1.2.0"
-pytest = "^7.3.1"
-pytest-cov = "^4.0.0"
-pre-commit = "^3.2.2"
-jupyter = "^1.0.0"
-
-
-[tool.poetry.group.extras.dependencies]
-matplotlib = "^3.7.1"
-pydot = "^1.4.2"
+[tool.setuptools]
+packages = ["hpo_tools"]
 
 [tool.black]
 line-length = 120
@@ -56,7 +52,3 @@ plugins = ["numpy.typing.mypy_plugin"]
 testpaths = [
     "tests"
 ]
-
-[build-system]
-requires = ["poetry-core>=1.2.0"]
-build-backend = "poetry.core.masonry.api"

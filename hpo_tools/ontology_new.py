@@ -1,13 +1,12 @@
 import tempfile
 import urllib.request
-from typing import Dict, Optional, Set, Union
+from typing import Dict, Optional, Set
 
 import networkx as nx
 import numpy as np
 import obonet
 from mp_utils import mp_wrapper
 from networkx.classes.multidigraph import MultiDiGraph
-from networkx.classes.multigraph import MultiGraph
 from numpy.typing import NDArray
 
 

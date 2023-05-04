@@ -16,5 +16,7 @@ def mp_wrapper(n_processes):
             n_processes = _parse_n_processes(n_processes)
             with mp.Pool(n_processes) as p:
                 return p.starmap(func, inputs)
+
         return wrapper
+
     return decorator

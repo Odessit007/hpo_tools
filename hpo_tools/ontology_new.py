@@ -1,24 +1,18 @@
-import urllib.request
 import tempfile
-from typing import (
-    Dict,
-    Optional,
-    Set,
-    Union
-)
+import urllib.request
+from typing import Dict, Optional, Set, Union
 
 import networkx as nx
+import numpy as np
+import obonet
+from mp_utils import mp_wrapper
 from networkx.classes.multidigraph import MultiDiGraph
 from networkx.classes.multigraph import MultiGraph
-import numpy as np
 from numpy.typing import NDArray
-import obonet
-
-from mp_utils import mp_wrapper
 
 
 class Ontology:
-    root_id = 'HP:0000118'
+    root_id = "HP:0000118"
 
     def __init__(self, hpo_path: Optional[str] = None, ignore_obsolete: bool = True):
         if hpo_path is None:
@@ -29,11 +23,11 @@ class Ontology:
         self.undirected_graph = self.graph.to_undirected(as_view=True)
         self.indexer = {node: i for i, node in enumerate(graph.nodes)}
         self.inverse_indexer = {i: node for i, node in enumerate(graph.nodes)}
-        self.__depths = None
+        self.__depths: Optional[Dict] = None
 
     @classmethod
     def _extract_phenotypic_abnormality_subgraph(cls, graph: MultiDiGraph) -> MultiDiGraph:
-        global_root_id = 'HP:0000001'
+        global_root_id = "HP:0000001"
         top_nodes = [child for (child, _) in graph.in_edges(global_root_id)]
         for node in top_nodes:
             if node == cls.root_id:
@@ -57,7 +51,7 @@ class Ontology:
 
     @staticmethod
     def _create_from_obolibrary(ignore_obsolete: bool) -> MultiDiGraph:
-        url = 'http://purl.obolibrary.org/obo/hp.obo'
+        url = "http://purl.obolibrary.org/obo/hp.obo"
         with tempfile.NamedTemporaryFile() as f:
             _ = urllib.request.urlretrieve(url, f.name)
             return obonet.read_obo(f.name, ignore_obsolete)
@@ -119,5 +113,5 @@ class Ontology:
         return np.vstack(rows)
 
 
-onto = Ontology('/Users/ivustianiu/hpo_tools/hp.obo')
+onto = Ontology("/Users/ivustianiu/hpo_tools/hp.obo")
 pass

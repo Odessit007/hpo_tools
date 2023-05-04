@@ -1,15 +1,9 @@
 name: Test and Lint
 
 on: workflow_dispatch
-#on:
-#  push:
-#    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
 
 jobs:
   test-and-lint:
-
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true

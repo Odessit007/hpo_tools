@@ -19,13 +19,20 @@ authors = [
     {name = "Odessit007", email = "igor.vustyanyuk@gmail.com"},
 ]
 dependencies = [
-    "pronto>=2.5.4",
     "numba>=0.57.0",
     "numpy>=1.24.3",
+    "obonet>=1.0.0",
 ]
 requires-python = ">=3.8,<3.12"
 readme = "README.md"
 license = {text = "GPL-3.0-only"}
+[project.optional-dependencies]
+optional = [
+    "requests>=2.30.0",
+    "memory-profiler>=0.61.0",
+    "matplotlib>=3.7.1",
+    "pronto>=2.5.4",
+]
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]

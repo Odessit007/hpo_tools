@@ -1,135 +1,118 @@
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+import tempfile
+import urllib.request
+from typing import Dict, Optional, Set
 
-import pronto
-
-
-def _traverse_pronto(hpo: pronto.Ontology, term: pronto.term.Term, is_a: Dict[str, List[str]]):
-    is_a[term.id] = [t.id for t in term.superclasses(1, False) if t.id != "HP:0000001"]
-    for c in term.subclasses(1, False):
-        _traverse_pronto(hpo, c, is_a)
+import networkx as nx
+import numpy as np
+import obonet
+from hpo_tools.mp_utils import mp_wrapper
+from networkx.classes.multidigraph import MultiDiGraph
+from numpy.typing import NDArray
 
 
 class Ontology:
     root_id = "HP:0000118"
 
-    @classmethod
-    def from_obo_file(cls, path):
-        hpo = pronto.Ontology(path)
-        return cls._from_obo(hpo)
+    def __init__(self, hpo_path: Optional[str] = None, ignore_obsolete: bool = True):
+        if hpo_path is None:
+            graph = self._create_from_obolibrary(ignore_obsolete)
+        else:
+            graph = obonet.read_obo(hpo_path, ignore_obsolete)
+        self.version = graph.graph['data-version'].split('/')[-1]
+        self.graph: MultiDiGraph = self._extract_phenotypic_abnormality_subgraph(graph)
+        self.undirected_graph = self.graph.to_undirected(as_view=True)
+        self.indexer = {node: i for i, node in enumerate(graph.nodes)}
+        self.inverse_indexer = {i: node for i, node in enumerate(graph.nodes)}
+        self.__depths: Optional[Dict] = None
+        # TODO Add `categories` attribute
+        # TODO Add `category` method
 
     @classmethod
-    def from_obo_library(cls):
-        hpo = pronto.Ontology.from_obo_library("hp.obo")
-        return cls._from_obo(hpo)
-
-    @classmethod
-    def _from_obo(cls, hpo: pronto.Ontology):
-        root = hpo.get_term(cls.root_id)
-        # data_version is expected to always be set for HPO
-        version = hpo.metadata.data_version.split("/")[-1]  # type: ignore
-        is_a = {}  # type: Dict[str, List[str]]
-        _traverse_pronto(hpo, root, is_a)
-        hpo_ids = list(is_a.keys())
-        names = [hpo[hpo_id].name for hpo_id in hpo_ids]
-        return cls(hpo_ids, names, is_a, version)  # type: ignore
-
-    # @classmethod
-    # def from_phenodf(cls, phenodf: pd.DataFrame):
-    #     hpo_ids: List[str] = list(phenodf.index)
-    #     names: List[str] = phenodf["name"].tolist()
-    #     is_a = {index: row["is_a"] for index, row in phenodf.iterrows()}
-    #     return cls(hpo_ids, names, is_a)
-
-    def __init__(self, hpo_ids: List[str], names: List[str], is_a: Dict[str, List[str]], version: Optional[str] = None):
-        self.hpo_ids = hpo_ids
-        self.names = names
-        self.n_terms = len(hpo_ids)
-        self.version = version
-
-        self.pheno_indexer: Dict[str, int] = {hpo_id: node for (node, hpo_id) in enumerate(hpo_ids)}
-        self.inverse_pheno_indexer: List[str] = [hpo_id for (hpo_id, node) in self.pheno_indexer.items()]
-        self.nodes: List[int] = list(self.pheno_indexer.values())
-
-        self.root: int = self.pheno_indexer[self.root_id]
-        children, parents = self._build_graph(is_a)
-        self.children: List[List[int]] = children
-        self.parents: List[List[int]] = parents
-
-        self.category_nodes = sorted(children[self.root])
-        self.categories: List[Set[int]] = self._build_categories()
-        self.ancestors: List[Set[int]] = [self.get_node_ancestors(node) for node in self.nodes]
-
-    def _build_graph(
-        self, is_a: Dict[str, List[str]], sanity_check: bool = True
-    ) -> Tuple[List[List[int]], List[List[int]]]:
-        children = [[] for _ in self.nodes]  # type: List[List[int]]
-        parents = [[] for _ in self.nodes]  # type: List[List[int]]
-        for hpo_id, node in self.pheno_indexer.items():
-            if node == self.root:  # ROOT's child is set to ROOT in the dataframe, but we want a proper DAG
+    def _extract_phenotypic_abnormality_subgraph(cls, graph: MultiDiGraph) -> MultiDiGraph:
+        global_root_id = "HP:0000001"
+        top_nodes = [child for (child, _) in graph.in_edges(global_root_id)]
+        for node in top_nodes:
+            if node == cls.root_id:
                 continue
-            parent_ids = is_a[hpo_id]
-            for parent_id in parent_ids:
-                parent = self.pheno_indexer[parent_id]
-                children[parent].append(node)
-                parents[node].append(parent)
-        if sanity_check:
-            # Checking that ROOT is a source node (no parents)
-            for children_ in children:
-                assert self.root not in children_
-            assert not parents[self.root]
-            # Checking that ROOT is the only source node
-            n_nodes_with_parents = sum(bool(p) for p in parents)
-            assert n_nodes_with_parents == len(self.nodes) - 1
-        return children, parents
+            ancestors = nx.ancestors(graph, node) | {node}
+            graph.remove_nodes_from(ancestors)
+        graph.remove_node(global_root_id)
+        del graph.nodes[cls.root_id]['is_a']
+        return graph
 
-    def _traverse_to_category(self, node: int, node2cat: Dict[int, Set[int]]) -> None:
-        node_categories = set()
-        for p in self.parents[node]:
-            if p not in node2cat:  # Previously unvisited node
-                self._traverse_to_category(p, node2cat)
-            node_categories.update(node2cat[p])
-        node2cat[node] = node_categories
+    def __len__(self):
+        return len(self.graph)
 
-    def _build_categories(self) -> List[Set[int]]:
-        node2cat = {cat: {cat} for cat in self.category_nodes}
-        node2cat[self.root] = set()
-        for node in self.nodes:
-            if not self.children[node]:  # Traverse from leaves to the top
-                self._traverse_to_category(node, node2cat)
-        return [node2cat[node] for node in self.nodes]
+    def __iter__(self):
+        return iter(self.graph)
 
-    def get_categories(self, node: int, simplify: bool = False) -> str:
-        node_categories = [self.names[cat] for cat in self.categories[node]]
-        node_categories = [
-            cat.lower()
-            .replace("abnormality of the", "")
-            .replace("abnormality of", "")
-            .replace("abnormality", "")
-            .replace("abnormal", "")
-            .replace("system", "")
-            .replace("blood and blood-forming tissues", "blood")
-            .replace("prenatal development or birth", "prenatal/birth")
-            .strip()
-            if simplify
-            else cat
-            for cat in node_categories
-        ]
-        return ", ".join(sorted(node_categories))
+    @property
+    def nodes(self):
+        return self.graph.nodes
 
-    def _get_node_ancestors(self, node: int, max_dist: int = -1, cur_dist: int = 0) -> Set[int]:
-        if cur_dist == max_dist or node == self.root:
-            return {node}
-        ans = {node}
-        for p in self.parents[node]:
-            # Not the best implementation (intermediate values are not stored) but fast enough and runs only once
-            ans.update(self._get_node_ancestors(p, max_dist, cur_dist + 1))
+    @staticmethod
+    def _create_from_obolibrary(ignore_obsolete: bool) -> MultiDiGraph:
+        url = "http://purl.obolibrary.org/obo/hp.obo"
+        with tempfile.NamedTemporaryFile() as f:
+            _ = urllib.request.urlretrieve(url, f.name)
+            return obonet.read_obo(f.name, ignore_obsolete)
+
+    def children(self, hpo_id: str) -> Set[str]:
+        """Ontology edges are directed towards the root so children are formally predecessors."""
+        return set(self.graph.predecessors(hpo_id))
+
+    def parents(self, hpo_id: str) -> Set[str]:
+        """Ontology edges are directed towards the root so parents are formally successors."""
+        return set(self.graph.successors(hpo_id))
+
+    def descendants(self, hpo_id: str, include_self: bool = True) -> Set[str]:
+        """Ontology edges are directed towards the root so descendants are formally ancestors."""
+        descendants = nx.ancestors(self.graph, hpo_id)
+        return descendants | {hpo_id} if include_self else descendants
+
+    def ancestors(self, hpo_id: str, include_self: bool = True) -> Set[str]:
+        """Ontology edges are directed towards the root so ancestors are formally descendants."""
+        ancestors = nx.descendants(self.graph, hpo_id)
+        return ancestors | {hpo_id} if include_self else ancestors
+
+    @property
+    def depths(self) -> Dict[str, int]:
+        """Depth := distance from the given node to the ontology root."""
+        if self.__depths is None:
+            depths = nx.single_target_shortest_path_length(self.graph, self.root_id)
+            self.__depths = dict(depths)
+        return self.__depths
+
+    def depth(self, hpo_id) -> int:
+        """Depth := distance from the given node to the ontology root."""
+        return self.depths[hpo_id]
+
+    def distance(self, source: str, target: str, undirected: bool = False) -> int:
+        """
+        :param source: HPO ID of source node
+        :param target: HPO ID of target node
+        :param undirected: if True, edge direction will be ignored
+        :return: distance from source to target
+        """
+        graph = self.undirected_graph if undirected else self.graph
+        return nx.shortest_path_length(graph, source, target)
+
+    def _get_dist_matrix_row(self, source: str) -> NDArray[np.uint16]:
+        lens = dict(nx.single_source_shortest_path_length(self.undirected_graph, source))
+        ans = np.zeros(len(self), dtype=np.uint16)
+        for key, i in self.indexer.items():
+            ans[i] = lens[key]
         return ans
 
-    def get_node_ancestors(self, node: int, max_dist: int = -1) -> Set[int]:
-        return self._get_node_ancestors(node, max_dist)
+    def get_dist_matrix(self, n_processes: int) -> NDArray[np.uint16]:
+        inputs = (node for node in self.graph.nodes)
+        rows = mp_wrapper(n_processes)(self._get_dist_matrix_row)(inputs)
+        return np.vstack(rows)
 
-    def get_nodeset_ancestors(self, nodes: Iterable[int], max_dist: int = -1) -> Set[int]:
-        ans = set()
-        for node in set(nodes):
-            ans |= self.get_node_ancestors(node, max_dist)
-        return ans
+    def wang_similarity(self):
+        # TODO
+        pass
+
+
+onto = Ontology("/Users/ivustianiu/hpo_tools/hp.obo")
+pass

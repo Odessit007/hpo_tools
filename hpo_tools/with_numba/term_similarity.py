@@ -14,8 +14,8 @@ from hpo_tools.with_numba.set_utils import intersection_max, intersection_sum, u
 def sim_resnik(a: int, b: int, ancestors: NDArray[uint], ic: NDArray[single], check_lineage: bool = False):
     A = ancestors[a]
     B = ancestors[b]
-    # TODO Try njit + binary search instead of built-in `in`
-    # TODO Profile function with and without this if for the case when check_lineage=False
+    # TODO [V2] Try njit + binary search instead of built-in `in`
+    # TODO [V2] Profile function with and without this if for the case when check_lineage=False
     if check_lineage and a not in B and b not in A:
         return 0.0
     return intersection_max(A, B, ic)

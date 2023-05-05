@@ -5,9 +5,10 @@ from typing import Dict, Optional, Set
 import networkx as nx
 import numpy as np
 import obonet
-from hpo_tools.mp_utils import mp_wrapper
 from networkx.classes.multidigraph import MultiDiGraph
 from numpy.typing import NDArray
+
+from hpo_tools.mp_utils import mp_wrapper
 
 
 class Ontology:
@@ -18,7 +19,7 @@ class Ontology:
             graph = self._create_from_obolibrary(ignore_obsolete)
         else:
             graph = obonet.read_obo(hpo_path, ignore_obsolete)
-        self.version = graph.graph['data-version'].split('/')[-1]
+        self.version = graph.graph["data-version"].split("/")[-1]
         self.graph: MultiDiGraph = self._extract_phenotypic_abnormality_subgraph(graph)
         self.undirected_graph = self.graph.to_undirected(as_view=True)
         self.indexer = {node: i for i, node in enumerate(graph.nodes)}
@@ -37,7 +38,7 @@ class Ontology:
             ancestors = nx.ancestors(graph, node) | {node}
             graph.remove_nodes_from(ancestors)
         graph.remove_node(global_root_id)
-        del graph.nodes[cls.root_id]['is_a']
+        del graph.nodes[cls.root_id]["is_a"]
         return graph
 
     def __len__(self):

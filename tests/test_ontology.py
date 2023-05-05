@@ -2,7 +2,7 @@ from hpo_tools.ontology import Ontology
 
 
 class TestBuild:
-    ontology = Ontology('data/hp.obo')
+    ontology = Ontology("data/hp.obo")
 
     def test_ontology_sanity(self):
         ontology = self.ontology

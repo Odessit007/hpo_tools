@@ -33,6 +33,9 @@ optional = [
     "matplotlib>=3.7.1",
     "pronto>=2.5.4",
 ]
+extras = [
+    "dgl>=1.1.0",
+]
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]

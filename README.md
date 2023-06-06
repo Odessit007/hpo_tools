@@ -34,7 +34,9 @@ Implementation plan - phase 1
       * [ ] support `n: int` for maximum distance
     * [x] depth(hpo_id: str)
     * [x] distance(source: str, target: str, undirected: bool)
+    * [ ] inverse_distance(source: str, target: str, undirected: bool)
     * [ ] get_dist_matrix(n_processes: int)
+    * [ ] add Leacock and Chodorow path-based similarity: https://www.sciencedirect.com/science/article/pii/S1532046406000645?viewFullText=true#bib36
     * [ ] (*) plot_subgraph
       * [ ] simple version: show a layered view of the subgraph
       * [ ] add optional `color: str` and `alpha: float` parameters to color nodes with a given color and given intensity
@@ -71,6 +73,16 @@ Implementation plan - phase 1
   * [ ] add tests
 * [ ] IC-based term-to-term similarity
   * [ ] Profile functions with and without `ancestors_only` flag
+  * [ ] Check a review study: https://www.sciencedirect.com/science/article/pii/S1532046406000645?via%3Dihub
+  * [ ] Check unifying formula, new normalization approach and comment about issues with Resnik: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3775452/
+  * [ ] Check GraSM: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-S5-S4#ref-CR10
+  * [ ] Add the similarity sources:
+    * Resnik: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-S5-S4#ref-CR5
+    * Lin: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-S5-S4#ref-CR6
+    * Jiang and Conrath: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-S5-S4#ref-CR7
+    * simUI: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-S5-S4#ref-CR13
+    * simGIC: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-S5-S4#ref-CR14
+    * Review this for more sources: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0115692
   * [ ] LIST ALL THE PLANNED SIMILARITY
   * [ ] ADD TESTS
 * [ ] Set-to-Set similarity

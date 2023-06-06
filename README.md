@@ -57,6 +57,8 @@ Implementation plan - phase 1
   * [ ] support smoothing for IC calculation: allow user to choose
         return IC(0/N) = 0 or IC(0/N) = 1 or IC(0/N) = -log(1/(N+1))
     * See here: https://www.sciencedirect.com/science/article/pii/S0020025514006677 
+  * [ ] support normalization to [0, 1] interval (IC_normalized(v) = IC(v) / IC(root))
+    * See here: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-S5-S4#Sec11
   * [ ] store total term count
     * [ ] raw
     * [ ] annotated
